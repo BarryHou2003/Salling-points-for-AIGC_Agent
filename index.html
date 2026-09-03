@@ -3,28 +3,33 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>从一句口播，到一支成片 · 多 Agent 工程实践</title>
+<title>Selling-Point Assets × AIGC · 一句口播进，一支成片出</title>
+<meta name="description" content="一套多 Agent 系统，把海量广告素材沉淀为分行业、可复用、可跨期对比的卖点 × Hook 双资产库——再由资产驱动 AIGC，批量生成创意视频。" />
 <style>
   :root{
     --bg:#ffffff;
     --bg-soft:#f7f8fa;
-    --ink:#1d2129;
+    --ink:#161a23;
     --ink-2:#4e5969;
     --ink-3:#86909c;
     --line:#e8eaef;
     --line-soft:#f2f3f6;
-    --accent:#0a5cff;
-    --accent-deep:#0846c4;
-    --accent-light:#6f9dff;
-    --accent-soft:rgba(10,92,255,.06);
+    --accent:#2f5cff;
+    --accent-deep:#1d42d8;
+    --accent-light:#7aa2ff;
+    --violet:#7c3aed;
+    --cyan:#06b6d4;
+    --accent-soft:rgba(47,92,255,.06);
     --green:#0f9d58;
+    --dark:#0a0e1c;
     --radius:20px;
     --content:1120px;
     --serif:"Songti SC","STSong","Noto Serif CJK SC",serif;
     --sans:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,-apple-system,sans-serif;
     --mono:ui-monospace,"SF Mono",Menlo,monospace;
     --ease:cubic-bezier(.22,.61,.36,1);
-    --sh-sm:0 1px 2px rgba(29,33,41,.04),0 8px 24px rgba(29,33,41,.05);
+    --sh-sm:0 1px 2px rgba(22,26,35,.04),0 8px 24px rgba(22,26,35,.05);
+    --grad:linear-gradient(100deg,var(--accent) 0%,var(--violet) 55%,var(--cyan) 110%);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -43,48 +48,58 @@
   ::-webkit-scrollbar-thumb{background:#d9dce2;border-radius:8px;border:2.5px solid #fff}
   ::-webkit-scrollbar-track{background:transparent}
   .title,.hero-title,.outro .big,.clash{text-wrap:balance}
-  .macro-arrow,.chain-arrow,.aigc-arrow{color:#c2c8d0;font-weight:300}
 
   .wrap{max-width:var(--content);margin:0 auto;padding:0 40px}
+
+  /* ── 滚动进度条 ─────────────────────── */
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;background:var(--grad)}
 
   /* ── 顶部导航 ───────────────────────── */
   .nav{
     position:fixed;top:0;left:0;right:0;z-index:50;
-    background:rgba(255,255,255,.78);
-    backdrop-filter:blur(20px) saturate(1.6);
-    -webkit-backdrop-filter:blur(20px) saturate(1.6);
+    transition:background .35s,border-color .35s,box-shadow .35s;
     border-bottom:1px solid transparent;
-    transition:border-color .3s;
   }
-  .nav.scrolled{border-bottom-color:var(--line-soft)}
   .nav-inner{
     max-width:var(--content);margin:0 auto;padding:0 40px;
-    height:56px;display:flex;align-items:center;justify-content:space-between;
+    height:58px;display:flex;align-items:center;justify-content:space-between;
   }
-  .nav-brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;letter-spacing:.02em}
-  .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
-  .nav-links{display:flex;gap:26px;font-size:13px;color:var(--ink-2)}
-  .nav-links a{color:inherit;text-decoration:none;transition:color .2s}
-  .nav-links a:hover{color:var(--accent)}
-  @media(max-width:820px){.nav-links{display:none}}
+  .nav-brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;letter-spacing:.02em;font-family:var(--sans);color:#fff;transition:color .35s}
+  .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-light);box-shadow:0 0 12px rgba(122,162,255,.8)}
+  .nav-links{display:flex;gap:26px;font-size:13px;font-family:var(--sans)}
+  .nav-links a{color:rgba(255,255,255,.62);text-decoration:none;transition:color .2s}
+  .nav-links a:hover{color:#fff}
+  .nav.scrolled{
+    background:rgba(255,255,255,.82);
+    backdrop-filter:blur(20px) saturate(1.6);
+    -webkit-backdrop-filter:blur(20px) saturate(1.6);
+    border-bottom-color:var(--line-soft);
+    box-shadow:0 4px 24px rgba(22,26,35,.04);
+  }
+  .nav.scrolled .nav-brand{color:var(--ink)}
+  .nav.scrolled .nav-dot{background:var(--accent);box-shadow:none}
+  .nav.scrolled .nav-links a{color:var(--ink-2)}
+  .nav.scrolled .nav-links a:hover{color:var(--accent)}
+  @media(max-width:860px){.nav-links{display:none}}
 
   /* ── 通用 section ───────────────────── */
-  section{padding:130px 0}
+  section{padding:120px 0}
   .eyebrow{
+    font-family:var(--sans);
     font-size:12px;font-weight:600;letter-spacing:.28em;color:var(--accent);
     text-transform:uppercase;margin-bottom:22px;
   }
   section .eyebrow{display:flex;align-items:center;gap:14px}
   section .eyebrow::before{content:"";width:28px;height:1px;background:var(--accent);opacity:.55;flex:0 0 28px}
-  .numbers .eyebrow::before{background:var(--accent-light)}
   .title{
     font-family:var(--serif);
-    font-size:clamp(34px,4.6vw,54px);
-    font-weight:700;line-height:1.25;letter-spacing:.01em;
+    font-size:clamp(32px,4.4vw,50px);
+    font-weight:700;line-height:1.28;letter-spacing:.01em;
     margin-bottom:24px;
   }
-  .lede{font-size:18px;color:var(--ink-2);max-width:760px}
-  .divider{height:1px;background:var(--line-soft);border:0}
+  .lede{font-size:17.5px;color:var(--ink-2);max-width:760px}
+  .lede b{color:var(--ink);font-weight:600}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 
   /* ── 滚动渐显 ───────────────────────── */
   .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
@@ -93,92 +108,135 @@
   .d4{transition-delay:.32s}.d5{transition-delay:.40s}
   @media (prefers-reduced-motion:reduce){
     .reveal{transition:none;opacity:1;transform:none}
-    .gt-live i{animation:none}
+    .gt-live i,.orb,.conn-line{animation:none !important}
     html{scroll-behavior:auto}
   }
 
-  /* ── Hero ───────────────────────────── */
+  /* ── Hero（暗色极光） ────────────────── */
   .hero{
-    padding:180px 0 110px;text-align:center;
-    background:radial-gradient(58% 46% at 50% 4%, rgba(10,92,255,.055), rgba(10,92,255,0) 72%);
+    position:relative;overflow:hidden;
+    padding:190px 0 120px;text-align:center;
+    background:var(--dark);color:#fff;
   }
-  .hero .eyebrow{margin-bottom:26px}
+  .hero::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+    background-size:56px 56px;
+    mask-image:radial-gradient(70% 60% at 50% 30%,#000 30%,transparent 100%);
+    -webkit-mask-image:radial-gradient(70% 60% at 50% 30%,#000 30%,transparent 100%);
+  }
+  .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 14s ease-in-out infinite alternate}
+  .orb.a{width:560px;height:560px;left:-140px;top:-180px;background:radial-gradient(circle,rgba(47,92,255,.55),transparent 65%)}
+  .orb.b{width:520px;height:520px;right:-160px;top:-60px;background:radial-gradient(circle,rgba(124,58,237,.42),transparent 65%);animation-delay:-5s}
+  .orb.c{width:460px;height:460px;left:34%;bottom:-260px;background:radial-gradient(circle,rgba(6,182,212,.30),transparent 65%);animation-delay:-9s}
+  @keyframes drift{
+    from{transform:translate(0,0) scale(1)}
+    to{transform:translate(46px,30px) scale(1.08)}
+  }
+  .hero-inner{position:relative;z-index:2}
+  .hero-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;
+    color:rgba(255,255,255,.78);
+    border:1px solid rgba(255,255,255,.18);border-radius:999px;
+    padding:8px 18px;background:rgba(255,255,255,.05);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    margin-bottom:34px;
+  }
+  .hero-badge i{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 10px rgba(52,211,153,.9)}
   .hero-title{
     font-family:var(--serif);
-    font-size:clamp(44px,7vw,84px);
-    font-weight:700;line-height:1.18;letter-spacing:.06em;
+    font-size:clamp(46px,7.4vw,88px);
+    font-weight:700;line-height:1.2;letter-spacing:.04em;
   }
-  .hero-title em{font-style:normal;color:var(--accent)}
-  .hero-kicker{
-    margin-top:26px;font-size:15px;font-weight:600;
-    letter-spacing:.24em;color:var(--ink-2);
+  .hero-title em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero-sub{margin:26px auto 0;max-width:700px;font-size:17.5px;color:rgba(255,255,255,.62)}
+  .hero-sub b{color:#fff;font-weight:600}
+  .hero-stats{margin:44px auto 0;display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+  .hstat{
+    font-family:var(--sans);font-size:13px;color:rgba(255,255,255,.78);
+    border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:9px 20px;
+    background:rgba(255,255,255,.04);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   }
-  .hero-kicker i{font-style:normal;color:var(--accent);margin:0 10px}
-  .hero-sub{margin:18px auto 0;max-width:680px;font-size:18px;color:var(--ink-2)}
+  .hstat b{color:#fff;font-weight:700;font-family:var(--serif);font-size:15px;margin-right:6px}
 
-  /* ── 全链路 case ───────────────────── */
-  .caseflow{
-    margin-top:80px;border:1px solid var(--line);border-radius:var(--radius);
-    background:#fff;overflow:hidden;text-align:left;
-    transition:box-shadow .35s var(--ease);
+  /* ── Hero 管线 ──────────────────────── */
+  .pipe{
+    position:relative;z-index:2;
+    margin:76px auto 0;display:flex;align-items:stretch;justify-content:center;
+    max-width:1100px;
   }
-  .caseflow:hover{box-shadow:0 24px 60px rgba(29,33,41,.08)}
-  .caseflow-head{
-    padding:24px 34px;border-bottom:1px solid var(--line-soft);background:var(--bg-soft);
-    display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  .pipe-node{
+    flex:1;min-width:0;padding:24px 14px 20px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.12);border-radius:16px;
+    display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    transition:transform .35s var(--ease),border-color .35s,background .35s,box-shadow .35s;
   }
-  .caseflow-head h3{font-size:20px;font-weight:700}
-  .caseflow-head span{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.14em}
-  .cf-row{display:grid;grid-template-columns:180px 1fr;gap:22px;padding:17px 34px;align-items:start;transition:background .3s}
-  .cf-row:hover{background:var(--bg-soft)}
-  .cf-row + .cf-row{border-top:1px solid var(--line-soft)}
-  .cf-stage{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);padding-top:3px;line-height:1.6}
-  .cf-stage b{display:block;color:var(--accent);font-size:12.5px;letter-spacing:.06em}
-  .cf-body{font-size:14.5px;color:var(--ink-2);line-height:1.8}
-  .cf-body b{color:var(--ink);font-weight:600}
-  .cf-body .vo{color:var(--ink);font-size:15px}
-  .cf-chip{
-    display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 10px;
-    border-radius:999px;background:var(--accent-soft);border:1px solid rgba(10,92,255,.2);
-    color:var(--accent-deep);margin:2px 4px 2px 0;
+  .pipe-node:hover{transform:translateY(-5px);border-color:rgba(122,162,255,.6);background:rgba(47,92,255,.10);box-shadow:0 18px 46px rgba(47,92,255,.22)}
+  .pipe-stage{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:rgba(255,255,255,.42)}
+  .pipe-name{font-size:16.5px;font-weight:700;font-family:var(--sans)}
+  .pipe-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;font-family:var(--sans)}
+  .pipe-node.hl{
+    background:linear-gradient(155deg,rgba(47,92,255,.28),rgba(124,58,237,.22));
+    border-color:rgba(122,162,255,.5);
+    box-shadow:0 0 40px rgba(47,92,255,.25);
   }
-  .cf-jump{
-    display:inline-flex;align-items:center;gap:8px;margin-left:14px;padding:8px 20px;
-    border-radius:999px;background:var(--ink);color:#fff;font-size:13px;
-    text-decoration:none;font-family:var(--sans);
-    transition:transform .25s var(--ease),box-shadow .25s var(--ease);
+  .pipe-node.hl .pipe-desc{color:rgba(255,255,255,.68)}
+  .pipe-conn{flex:0 0 34px;display:grid;place-items:center}
+  .conn-line{
+    width:100%;height:2px;border-radius:2px;
+    background:repeating-linear-gradient(90deg,rgba(122,162,255,.85) 0 6px,transparent 6px 12px);
+    animation:flow 1.2s linear infinite;
   }
-  .cf-jump:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(29,33,41,.28)}
+  @keyframes flow{to{background-position:12px 0}}
+  .scroll-hint{
+    position:relative;z-index:2;margin-top:70px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.35);
+  }
   @media(max-width:860px){
-    .cf-row{grid-template-columns:1fr;gap:6px;padding:16px 22px}
-    .cf-jump{margin-left:0;margin-top:8px}
+    .pipe{flex-direction:column;max-width:400px}
+    .pipe-conn{flex:0 0 30px}
+    .conn-line{width:2px;height:100%;background:repeating-linear-gradient(180deg,rgba(122,162,255,.85) 0 6px,transparent 6px 12px);animation:flowv 1.2s linear infinite}
+    @keyframes flowv{to{background-position:0 12px}}
   }
 
-  .macro{
-    margin:80px auto 0;display:flex;align-items:stretch;justify-content:center;
-    max-width:1040px;text-align:center;
+  /* ── 三联卡 ─────────────────────────── */
+  .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+  .tri-card{
+    position:relative;
+    background:var(--bg-soft);border:1px solid var(--line-soft);border-radius:var(--radius);
+    padding:36px 30px;transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .35s,border-color .35s;
   }
-  .macro-node{
-    flex:1;min-width:0;padding:26px 18px 22px;
-    background:var(--bg);border:1px solid var(--line);border-radius:18px;
-    display:flex;flex-direction:column;gap:7px;align-items:center;justify-content:center;
-    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
+  .tri-card:hover{transform:translateY(-6px);background:#fff;box-shadow:0 20px 48px rgba(22,26,35,.08);border-color:rgba(47,92,255,.25)}
+  .tri-num{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.16em;margin-bottom:16px}
+  .tri-card h3{font-size:20px;font-weight:700;margin-bottom:6px}
+  .tri-card .tri-rule{font-size:14.5px;font-weight:600;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:12px;font-family:var(--sans)}
+  .tri-card p{font-size:14.5px;color:var(--ink-2)}
+  .tri-card p b{color:var(--ink);font-weight:600}
+  @media(max-width:860px){.tri{grid-template-columns:1fr}}
+
+  .clash{
+    margin-top:60px;text-align:center;font-family:var(--serif);
+    font-size:clamp(20px,2.6vw,27px);font-weight:700;line-height:1.6;
   }
-  .macro-node:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 16px 40px rgba(10,92,255,.10)}
-  .macro-stage{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--ink-3)}
-  .macro-name{font-size:19px;font-weight:700}
-  .macro-desc{font-size:12.5px;color:var(--ink-3);line-height:1.6}
-  .macro-node.hl{background:linear-gradient(155deg,#28304a 0%,var(--ink) 62%);border-color:var(--ink)}
-  .macro-node.hl .macro-stage{color:rgba(255,255,255,.55)}
-  .macro-node.hl .macro-name{color:#fff}
-  .macro-node.hl .macro-desc{color:rgba(255,255,255,.6)}
-  .macro-node.hl:hover{box-shadow:0 18px 46px rgba(29,33,41,.25);border-color:var(--ink)}
-  .macro-arrow{flex:0 0 34px;display:grid;place-items:center;color:var(--ink-3);font-size:15px}
-  .macro-note{margin-top:24px;font-size:13px;color:var(--ink-3)}
-  @media(max-width:860px){
-    .macro{flex-direction:column;max-width:420px}
-    .macro-arrow{transform:rotate(90deg);flex:0 0 30px}
+  .clash em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .pit{
+    margin-top:44px;border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:14px;padding:20px 26px;font-size:14px;color:var(--ink-2);
+    background:var(--bg-soft);max-width:920px;line-height:1.85;font-family:var(--sans);
   }
+  .pit b{color:var(--ink);font-weight:600}
+
+  /* ── 分带背景 ────────────────────────── */
+  .band{background:var(--bg-soft)}
+  .band .tri-card{background:#fff;border-color:var(--line)}
+  .band .tri-card:hover{box-shadow:0 20px 48px rgba(22,26,35,.10)}
 
   /* ── 资产层链路 ─────────────────────── */
   .chain{
@@ -190,373 +248,48 @@
     background:var(--bg);border:1px solid var(--line);border-radius:16px;
     padding:22px 14px 18px;
     display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
+    box-shadow:var(--sh-sm);
     transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
   }
-  .chain-node:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 16px 40px rgba(10,92,255,.10)}
-  .chain-tag{font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--ink-3)}
+  .chain-node:hover{transform:translateY(-5px);border-color:rgba(47,92,255,.5);box-shadow:0 16px 40px rgba(47,92,255,.12)}
+  .chain-tag{font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--ink-3);font-family:var(--sans)}
   .chain-node.hl .chain-tag{color:var(--accent)}
   .chain-word{font-size:16.5px;font-weight:600;line-height:1.5;word-break:break-all}
-  .chain-node.hl{background:var(--accent-soft);border-color:rgba(10,92,255,.35)}
+  .chain-node.hl{
+    background:linear-gradient(150deg,var(--accent-soft),rgba(124,58,237,.07));
+    border-color:rgba(47,92,255,.35);
+  }
   .chain-node.hl .chain-word{color:var(--accent-deep)}
-  .chain-arrow{flex:0 0 32px;display:grid;place-items:center;color:var(--ink-3);font-size:15px}
-  .chain-note{margin-top:22px;font-size:13px;color:var(--ink-3);text-align:center}
+  .chain-arrow{flex:0 0 32px;display:grid;place-items:center;color:#c2c8d0;font-weight:300}
+  .chain-note{margin-top:22px;font-size:13px;color:var(--ink-3);text-align:center;font-family:var(--sans)}
   @media(max-width:860px){
     .chain{flex-direction:column;max-width:420px}
     .chain-arrow{transform:rotate(90deg);flex:0 0 30px}
   }
-
-  /* ── 难点：三判据 ────────────────────── */
-  .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px}
-  .tri-card{
-    background:var(--bg-soft);border:1px solid var(--line-soft);border-radius:var(--radius);
-    padding:38px 30px;transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .35s;
-  }
-  .tri-card:hover{transform:translateY(-6px);background:#fff;box-shadow:0 20px 48px rgba(29,33,41,.08)}
-  .tri-num{font-family:var(--serif);font-size:16px;color:var(--accent);letter-spacing:.12em;margin-bottom:16px}
-  .tri-card h3{font-size:21px;font-weight:700;margin-bottom:6px}
-  .tri-card .tri-rule{font-size:15.5px;font-weight:600;color:var(--accent-deep);margin-bottom:12px;letter-spacing:.02em}
-  .tri-card p{font-size:14.5px;color:var(--ink-2)}
-  .clash{
-    margin-top:56px;text-align:center;font-family:var(--serif);
-    font-size:clamp(20px,2.6vw,27px);font-weight:700;line-height:1.6;
-  }
-  .clash em{font-style:normal;color:var(--accent)}
-  @media(max-width:860px){.tri{grid-template-columns:1fr}}
-  .lede b{color:var(--ink);font-weight:600}
-  .pit{
-    margin-top:44px;border:1px solid var(--line);border-left:3px solid var(--accent);
-    border-radius:14px;padding:20px 26px;font-size:14px;color:var(--ink-2);
-    background:var(--bg-soft);max-width:920px;line-height:1.85;
-  }
-  .pit b{color:var(--ink);font-weight:600}
-  .orch-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
-  .orch-chips span{
-    font-family:var(--mono);font-size:11px;padding:4px 11px;border-radius:999px;
-    border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.78);
-  }
-  .arch-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:40px}
-  .arch-chips span{
-    font-family:var(--mono);font-size:11.5px;padding:6px 15px;border-radius:999px;
-    background:var(--bg-soft);border:1px solid var(--line-soft);color:var(--ink-2);
-  }
-  .agent p b{color:var(--ink);font-weight:600}
-  .side-card p b{color:var(--ink);font-weight:600}
-
-  /* ── UI 铬件保持黑体，与宋体正文形成层次 ── */
-  .nav-inner,.eyebrow,.chain-tag,.macro-desc,.macro-note,.chain-note,.arch-note,
-  .orch .role,.script-style,.step span,.numbers .foot,
-  .outro .meta,.aigc-pill{font-family:var(--sans)}
-
-  /* ── 分带背景（节奏感） ─────────────── */
-  .band{background:var(--bg-soft)}
-  .band .tri-card{background:#fff;border-color:var(--line)}
-  .band .tri-card:hover{box-shadow:0 20px 48px rgba(29,33,41,.10)}
-  .band .tg{background:#fff}
-
-  /* ── 静息浮纸感：卡片默认极轻投影 ────── */
-  .macro-node,.chain-node,.tri-card,.agent,.path,.video-card,
-  .caseflow,.dual,.storyboard,.tg,.script-card,.side-card{box-shadow:var(--sh-sm)}
-  .orch{box-shadow:0 16px 40px rgba(29,33,41,.16)}
 
   /* ── 真实链路小卡 ───────────────────── */
   .mini-cap{margin-top:60px;font-size:13px;color:var(--ink-3);text-align:center;font-family:var(--sans)}
   .minis{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
   .mini{
     border:1px solid var(--line-soft);border-radius:14px;padding:18px 22px;background:var(--bg-soft);
-    transition:transform .3s var(--ease),border-color .3s,background .3s;
+    transition:transform .3s var(--ease),border-color .3s,background .3s,box-shadow .3s;
   }
-  .mini:hover{transform:translateY(-3px);border-color:rgba(10,92,255,.35);background:#fff}
+  .mini:hover{transform:translateY(-3px);border-color:rgba(47,92,255,.35);background:#fff;box-shadow:var(--sh-sm)}
   .mini-flow{font-size:14.5px;line-height:2}
   .mini-flow b{font-weight:700}
   .mini-flow i{font-style:normal;color:var(--ink-3);margin:0 7px;font-size:12px;font-family:var(--sans)}
   .mini-flow span{color:var(--ink-2)}
   .mini-meta{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
   @media(max-width:860px){.minis{grid-template-columns:1fr}}
-
-  /* ── 双通道向量化专题卡 ─────────────── */
-  .dual{
-    margin-top:28px;border:1px solid var(--line);border-radius:var(--radius);
-    padding:40px 38px;background:#fff;
-    transition:transform .35s var(--ease),box-shadow .35s var(--ease);
-  }
-  .dual:hover{transform:translateY(-4px);box-shadow:0 20px 48px rgba(29,33,41,.07)}
-  .dual h3{font-size:21px;font-weight:700;margin-bottom:12px}
-  .dual > p{font-size:15px;color:var(--ink-2);max-width:880px}
-  .dual > p b{color:var(--ink);font-weight:600}
-  .dual-formula{
-    display:inline-block;margin-top:14px;padding:6px 14px;border-radius:999px;
-    background:var(--accent-soft);border:1px solid rgba(10,92,255,.22);
-    font-family:var(--mono);font-size:12px;color:var(--accent-deep);
-  }
-  .dual-flow{display:flex;align-items:center;gap:10px;margin-top:22px;flex-wrap:wrap}
-  .dual-flow span{
-    font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:999px;
-    background:var(--bg-soft);border:1px solid var(--line-soft);color:var(--ink-2);
-  }
-  .dual-flow i{font-style:normal;color:var(--ink-3);font-family:var(--sans)}
-  .dual-effect{margin-top:24px;font-size:15px;color:var(--ink-2);max-width:880px}
-  .dual-effect b{color:var(--accent-deep);font-weight:600}
-
-  /* ── 分镜节选 ─────────────────────── */
-  .storyboard{margin-top:20px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff}
-  .sb-row{display:grid;grid-template-columns:110px 1fr 210px;gap:22px;padding:22px 28px;align-items:center;transition:background .3s}
-  .sb-row:hover{background:var(--bg-soft)}
-  .sb-row + .sb-row{border-top:1px solid var(--line-soft)}
-  .sb-no{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent)}
-  .sb-no span{display:block;font-weight:400;font-size:11px;color:var(--ink-3);margin-top:3px}
-  .sb-scene{font-size:14.5px;color:var(--ink);line-height:1.7}
-  .sb-vo{font-size:13.5px;color:var(--ink-3);margin-top:4px}
-  .sb-tag{
-    font-size:12px;color:var(--accent-deep);background:var(--accent-soft);
-    border:1px solid rgba(10,92,255,.2);border-radius:10px;padding:8px 12px;
-    line-height:1.6;text-align:center;font-family:var(--sans);
-  }
-  @media(max-width:860px){.sb-row{grid-template-columns:1fr;gap:10px}}
-
-  .hookline{
-    margin:52px auto 0;max-width:780px;text-align:center;
-    font-size:15.5px;color:var(--ink-2);line-height:1.9;
-  }
-  .hookline b{color:var(--ink);font-weight:600}
-
-  /* ── 灰度测试横幅 ──────────────────── */
-  .graytest{
-    margin-top:72px;border-radius:26px;padding:60px 40px;text-align:center;
-    background:linear-gradient(180deg,var(--accent-soft) 0%,#fff 100%);
-    border:1px solid rgba(10,92,255,.18);
-  }
-  .gt-live{
-    display:inline-flex;align-items:center;gap:9px;
-    font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;color:var(--accent-deep);
-    margin-bottom:20px;
-  }
-  .gt-live i{
-    width:8px;height:8px;border-radius:50%;background:var(--accent);
-    animation:pulse 1.8s ease-out infinite;
-  }
-  @keyframes pulse{
-    0%{opacity:1;box-shadow:0 0 0 0 rgba(10,92,255,.35)}
-    70%{opacity:.7;box-shadow:0 0 0 8px rgba(10,92,255,0)}
-    100%{opacity:1;box-shadow:0 0 0 0 rgba(10,92,255,0)}
-  }
-  .graytest p{font-size:clamp(26px,3.4vw,38px);font-weight:700;line-height:1.5}
-  .graytest p b{color:var(--accent);font-weight:700}
-
-  /* ── 架构总览 ───────────────────────── */
-  .arch{margin-top:72px}
-  .orch{
-    max-width:460px;margin:0 auto;text-align:center;
-    background:linear-gradient(155deg,#28304a 0%,var(--ink) 62%);
-    color:#fff;border-radius:var(--radius);padding:30px 34px;
-    position:relative;transition:transform .35s var(--ease),box-shadow .35s var(--ease);
-  }
-  .orch:hover{transform:translateY(-4px);box-shadow:0 22px 50px rgba(29,33,41,.22)}
-  .orch .role{font-size:12px;letter-spacing:.2em;opacity:.65;margin-bottom:8px}
-  .orch h3{font-family:var(--serif);font-size:24px;margin-bottom:6px}
-  .orch p{font-size:13.5px;opacity:.8;line-height:1.7}
-  .arch-line{width:1px;height:44px;background:var(--line);margin:0 auto}
-  .arch-fan{
-    position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-    padding-top:44px;
-  }
-  .arch-fan::before{
-    content:"";position:absolute;top:0;left:16.6%;right:16.6%;height:1px;background:var(--line);
-  }
-  .agent{
-    background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;
-    position:relative;transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
-  }
-  .agent::before{
-    content:"";position:absolute;top:-44px;left:50%;width:1px;height:44px;background:var(--line);
-  }
-  .agent:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 18px 44px rgba(10,92,255,.09)}
-  .agent .code{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.08em;margin-bottom:10px}
-  .agent h4{font-size:18px;font-weight:700;margin-bottom:8px}
-  .agent p{font-size:13.5px;color:var(--ink-2);line-height:1.7}
-  .workers{display:flex;gap:10px;margin-top:16px}
-  .worker{
-    flex:1;background:var(--bg-soft);border:1px dashed var(--line);border-radius:12px;
-    padding:10px 12px;font-size:12.5px;color:var(--ink-2);
-  }
-  .worker b{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-bottom:2px}
-  .arch-side{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
-  .side-card{
-    border-radius:var(--radius);padding:26px 28px;display:flex;gap:18px;align-items:flex-start;
-    transition:transform .35s var(--ease),box-shadow .35s var(--ease);
-  }
-  .side-card:hover{transform:translateY(-4px)}
-  .side-script{background:var(--bg-soft);border:1px solid var(--line-soft)}
-  .side-eval{background:var(--accent-soft);border:1px solid rgba(10,92,255,.22)}
-  .side-icon{
-    flex:0 0 40px;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
-    font-family:var(--mono);font-size:13px;font-weight:700;
-  }
-  .side-script .side-icon{background:#fff;border:1px solid var(--line);color:var(--ink-2)}
-  .side-eval .side-icon{background:var(--accent);color:#fff}
-  .side-card h4{font-size:16px;font-weight:700;margin-bottom:4px}
-  .side-card p{font-size:13.5px;color:var(--ink-2)}
-  .arch-note{margin-top:40px;text-align:center;font-size:14px;color:var(--ink-3)}
-  @media(max-width:860px){
-    .arch-fan{grid-template-columns:1fr;padding-top:0;gap:44px}
-    .arch-fan::before{display:none}
-    .agent::before{top:-24px;height:24px}
-    .arch-side{grid-template-columns:1fr}
-  }
-
-  /* ── 双路径 ─────────────────────────── */
-  .paths{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:64px}
-  .path{
-    border:1px solid var(--line);border-radius:var(--radius);padding:38px 34px;
-    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
-  }
-  .path:hover{transform:translateY(-5px);box-shadow:0 20px 48px rgba(29,33,41,.07);border-color:rgba(10,92,255,.4)}
-  .path-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
-  .path-head h3{font-family:var(--serif);font-size:24px}
-  .path-badge{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
-  .path-desc{font-size:14px;color:var(--ink-2);margin-bottom:26px}
-  .steps{display:flex;flex-direction:column;gap:0}
-  .step{display:flex;align-items:center;gap:16px;padding:13px 0}
-  .step + .step{border-top:1px solid var(--line-soft)}
-  .step-no{
-    flex:0 0 26px;width:26px;height:26px;border-radius:50%;
-    border:1px solid var(--line);display:grid;place-items:center;
-    font-size:12px;color:var(--ink-3);font-family:var(--mono);
-  }
-  .path:hover .step-no{border-color:rgba(10,92,255,.4);color:var(--accent)}
-  .step b{font-size:15px;font-weight:600;margin-right:8px}
-  .step span{font-size:13px;color:var(--ink-3)}
-  @media(max-width:860px){.paths{grid-template-columns:1fr}}
-
-  /* ── 工程机制 ───────────────────────── */
-  .mech{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:64px}
-  .mech-card{
-    border-top:1px solid var(--line);padding:34px 6px 8px;
-    transition:transform .35s var(--ease);
-  }
-  .mech-card:hover{transform:translateY(-4px)}
-  .mech-no{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.14em;margin-bottom:14px}
-  .mech-card h3{font-size:19px;font-weight:700;margin-bottom:10px}
-  .mech-card p{font-size:14.5px;color:var(--ink-2);max-width:460px}
-  .mech-tag{
-    display:inline-block;margin-top:14px;padding:5px 12px;border-radius:999px;
-    background:var(--bg-soft);border:1px solid var(--line-soft);
-    font-family:var(--mono);font-size:11.5px;color:var(--ink-2);
-  }
-  @media(max-width:860px){.mech{grid-template-columns:1fr}}
-
-  /* ── TextGrad ───────────────────────── */
-  .tg{margin-top:60px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  .tg-row{
-    display:grid;grid-template-columns:1fr 1.35fr 1.15fr;
-    transition:background .3s;
-  }
-  .tg-row + .tg-row{border-top:1px solid var(--line-soft)}
-  .tg-row:hover{background:var(--bg-soft)}
-  .tg-head{background:var(--bg-soft)}
-  .tg-head:hover{background:var(--bg-soft)}
-  .tg-cell{padding:22px 26px;font-size:14px;color:var(--ink-2);line-height:1.7}
-  .tg-cell + .tg-cell{border-left:1px solid var(--line-soft)}
-  .tg-head .tg-cell{
-    padding:14px 26px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
-    color:var(--ink-3);font-weight:700;
-  }
-  .tg-pain{font-weight:700;color:var(--ink);font-size:15px}
-  .tg-pain small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-3);margin-top:4px}
-  .tg-mech b{color:var(--accent-deep);font-weight:600}
-  .tg-win b{color:var(--green);font-weight:600}
-  @media(max-width:860px){
-    .tg-row{grid-template-columns:1fr}
-    .tg-cell + .tg-cell{border-left:0;border-top:1px dashed var(--line-soft)}
-    .tg-head{display:none}
-  }
-
-  /* ── AIGC 成片 ─────────────────────── */
-  .aigc-flow{
-    margin:56px auto 0;display:flex;align-items:center;justify-content:center;gap:0;
-    max-width:900px;text-align:center;
-  }
-  .aigc-pill{
-    padding:12px 22px;border-radius:999px;border:1px solid var(--line);
-    font-size:14px;font-weight:600;background:#fff;white-space:nowrap;
-  }
-  .aigc-pill.sellpoint{
-    background:var(--accent-soft);border-color:rgba(10,92,255,.35);color:var(--accent-deep);
-    box-shadow:0 8px 20px rgba(10,92,255,.08);
-  }
-  .aigc-arrow{flex:0 0 40px;color:var(--ink-3);font-size:15px}
-  @media(max-width:860px){
-    .aigc-flow{flex-direction:column;gap:10px}
-    .aigc-arrow{transform:rotate(90deg);flex:0 0 26px}
-  }
-
-  .scripts{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px}
-  .script-card{
-    border:1px solid var(--line);border-radius:var(--radius);padding:30px 28px;
-    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
-  }
-  .script-card:hover{transform:translateY(-5px);border-color:rgba(10,92,255,.4);box-shadow:0 18px 44px rgba(29,33,41,.08)}
-  .script-ver{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em;margin-bottom:12px}
-  .script-card h4{font-size:18px;font-weight:700;margin-bottom:4px}
-  .script-style{font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
-  .script-card p{font-size:13.5px;color:var(--ink-2);line-height:1.75}
-  @media(max-width:860px){.scripts{grid-template-columns:1fr}}
-
-  .videos{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:56px}
-  .video-card{
-    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
-    transition:transform .35s var(--ease),box-shadow .35s var(--ease);
-  }
-  .video-card:hover{transform:translateY(-5px);box-shadow:0 22px 52px rgba(29,33,41,.12)}
-  .video-card video{
-    display:block;width:100%;max-height:540px;background:#0b0d12;
-  }
-  .video-meta{padding:18px 24px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-top:1px solid var(--line-soft)}
-  .video-meta h4{font-size:15.5px;font-weight:700}
-  .video-meta span{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap}
-  @media(max-width:860px){.videos{grid-template-columns:1fr}}
-
-
-  /* ── 成果数字（深色面板） ─────────────── */
-  .numbers{
-    background:radial-gradient(135% 150% at 16% 0%, #27304a 0%, var(--ink) 52%);
-    border-radius:28px;padding:84px 64px;margin-top:20px;
-    box-shadow:0 30px 80px rgba(29,33,41,.22);
-  }
-  .numbers .eyebrow{color:var(--accent-light)}
-  .numbers .title{color:#fff}
-  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:56px}
-  .stat{border-left:1px solid rgba(255,255,255,.16);padding-left:28px;transition:border-color .35s var(--ease)}
-  .stat:hover{border-left-color:var(--accent-light)}
-  .stat .big{
-    font-family:var(--serif);font-size:clamp(40px,4.4vw,58px);font-weight:700;
-    line-height:1.1;color:#fff;
-  }
-  .stat .big em{font-style:normal;color:var(--accent-light)}
-  .stat .from{font-size:13px;color:rgba(255,255,255,.45);margin-top:8px;font-family:var(--mono)}
-  .stat h4{font-size:15px;font-weight:700;margin-top:16px;color:#fff}
-  .stat p{font-size:13.5px;color:rgba(255,255,255,.62);margin-top:4px}
-  .numbers .foot{
-    margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);
-    font-size:12.5px;color:rgba(255,255,255,.42);line-height:1.8;
-  }
-  @media(max-width:860px){.numbers{padding:56px 28px}.stat-grid{grid-template-columns:1fr}}
-
-  /* ── 收尾 ───────────────────────────── */
-  .outro{padding:150px 0 120px;text-align:center}
-  .outro .big{
-    font-family:var(--serif);font-size:clamp(30px,4.2vw,48px);font-weight:700;line-height:1.5;
-    letter-spacing:.05em;
-  }
-  .outro .big em{font-style:normal;color:var(--accent)}
-  .outro .meta{margin-top:34px;font-size:13px;color:var(--ink-3);letter-spacing:.06em}
-  .outro hr{width:56px;margin:40px auto 0;border:0;height:1px;background:var(--line)}
 </style>
 </head>
 <body>
 
+<div class="progress" id="progress"></div>
+
 <nav class="nav" id="nav">
   <div class="nav-inner">
-    <div class="nav-brand"><span class="nav-dot"></span>卖点资产 × AIGC</div>
+    <div class="nav-brand"><span class="nav-dot"></span>Selling-Point Assets × AIGC</div>
     <div class="nav-links">
       <a href="#asset">资产层</a>
       <a href="#arch">架构</a>
@@ -569,47 +302,53 @@
   </div>
 </nav>
 
-<!-- ① Hero：宏观链路 -->
-<header class="hero wrap">
-  <div class="eyebrow reveal">SELLING POINT ASSETS × AIGC · A MULTI-AGENT PRACTICE</div>
-  <h1 class="hero-title reveal d1">从<em>口播</em>到<em>成片</em></h1>
-  <p class="hero-kicker reveal d2">卖点资产 <i>×</i> AIGC<i>·</i>多 Agent 工程实践</p>
-  <p class="hero-sub reveal d2">一套<b>多 Agent 系统</b>，把海量广告素材沉淀成分行业、可复用、可跨期对比的<b>卖点 × Hook 双资产库</b>——资产再驱动 <b>AIGC</b>，批量长出创意视频。</p>
-
-  <div class="macro reveal d3">
-    <div class="macro-node">
-      <span class="macro-stage">INPUT</span>
-      <span class="macro-name">广告素材</span>
-      <span class="macro-desc">每天成百上千条<br>口播 / 画面文本</span>
-    </div>
-    <div class="macro-arrow">→</div>
-    <div class="macro-node">
-      <span class="macro-stage">ASSET · 中间环节</span>
-      <span class="macro-name">卖点 × Hook 双资产库</span>
-      <span class="macro-desc">卖点结构化沉淀<br>＋ Hook（勾子 · 叙事 · 营销）</span>
-    </div>
-    <div class="macro-arrow">→</div>
-    <div class="macro-node">
-      <span class="macro-stage">CREATIVE</span>
-      <span class="macro-name">创意脚本</span>
-      <span class="macro-desc">同一卖点<br>多种叙事外壳</span>
-    </div>
-    <div class="macro-arrow">→</div>
-    <div class="macro-node hl">
-      <span class="macro-stage">OUTPUT</span>
-      <span class="macro-name">AIGC 成片</span>
-      <span class="macro-desc">批量生成<br>某短视频平台内灰度测试</span>
+<!-- ① Hero -->
+<header class="hero">
+  <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
+  <div class="hero-inner wrap">
+    <div class="hero-badge reveal"><i></i>MULTI-AGENT SYSTEM · SELLING-POINT ASSETS × AIGC</div>
+    <h1 class="hero-title reveal d1">一句<em>口播</em>进<br>一支<em>成片</em>出</h1>
+    <p class="hero-sub reveal d2">一套多 Agent 系统，把海量广告素材沉淀为分行业、可复用、可跨期对比的<b>「卖点 × Hook」双资产库</b>——再由资产驱动 AIGC，批量生成创意视频。卖点资产不是终点，是发动机。</p>
+    <div class="hero-stats reveal d3">
+      <span class="hstat"><b>90.4</b>质量总分 · 等级 A</span>
+      <span class="hstat"><b>÷ 20</b>坏词率降幅</span>
+      <span class="hstat"><b>× 2</b>运行稳定性</span>
+      <span class="hstat"><b>¥0.018</b>单条素材全链路成本</span>
     </div>
   </div>
-  <p class="macro-note reveal d4">卖点资产不是终点，是发动机——下面先看这层资产是怎么炼出来的。</p>
+
+  <div class="pipe reveal d4">
+    <div class="pipe-node">
+      <span class="pipe-stage">INPUT</span>
+      <span class="pipe-name">广告素材</span>
+      <span class="pipe-desc">每天成百上千条<br>口播 / 画面文本</span>
+    </div>
+    <div class="pipe-conn"><div class="conn-line"></div></div>
+    <div class="pipe-node">
+      <span class="pipe-stage">ASSET</span>
+      <span class="pipe-name">卖点 × Hook 双资产库</span>
+      <span class="pipe-desc">结构化沉淀<br>可统计 · 可复用 · 可对比</span>
+    </div>
+    <div class="pipe-conn"><div class="conn-line"></div></div>
+    <div class="pipe-node">
+      <span class="pipe-stage">CREATE</span>
+      <span class="pipe-name">创意脚本</span>
+      <span class="pipe-desc">同一卖点<br>多种叙事外壳</span>
+    </div>
+    <div class="pipe-conn"><div class="conn-line"></div></div>
+    <div class="pipe-node hl">
+      <span class="pipe-stage">OUTPUT</span>
+      <span class="pipe-name">AIGC 成片</span>
+      <span class="pipe-desc">批量生成<br>已进入平台灰度测试</span>
+    </div>
+  </div>
+  <p class="scroll-hint reveal d5">SCROLL · 看资产如何炼成</p>
 </header>
 
-<div class="wrap"><hr class="divider"></div>
-
-<!-- ② 资产层：一条卖点的一生 -->
+<!-- ② 资产层 -->
 <section class="wrap" id="asset">
   <div class="eyebrow reveal">01 · THE ASSET LAYER</div>
-  <h2 class="title reveal d1">中间环节：把口播沉淀成资产</h2>
+  <h2 class="title reveal d1">把一句口语，炼成一条资产</h2>
   <p class="lede reveal d2">成片质量的上限，取决于卖点资产的质量。这一层做的事：把一句口语，变成一个<b>能被统计、能跨期对比、能被下游调用</b>的标准条目。</p>
 
   <div class="chain reveal d2">
@@ -640,7 +379,7 @@
   </div>
   <p class="chain-note reveal d3">一句口语 → 标准卖点词 → 挂进「二级卖点 → 一级卖点」的稳定骨架。这层资产，是后面一切的地基。</p>
 
-  <p class="mini-cap reveal d4">再随便看三条真实在库的链路（休闲食品 · 累积库）</p>
+  <p class="mini-cap reveal d4">三条真实在库链路（休闲食品 · 累积库）</p>
   <div class="minis">
     <div class="mini reveal d3">
       <div class="mini-flow"><b>配料表干净</b><i>→</i><span>配料干净纯食材</span><i>→</i><span>用料品质</span></div>
@@ -657,62 +396,409 @@
   </div>
 </section>
 
-<!-- ③ 为什么难 -->
-<section class="wrap" id="why" style="padding-top:40px">
+<!-- ③ 为什么多 Agent -->
+<section class="band" id="why">
+ <div class="wrap">
   <div class="eyebrow reveal">02 · WHY MULTI-AGENT</div>
   <h2 class="title reveal d1">同一件事，三种互相冲突的判据</h2>
-  <p class="lede reveal d2">上面那四步看着简单，但每一步对"什么叫做得好"的要求是互相打架的。</p>
+  <p class="lede reveal d2">上面四步看着简单，但每一步对「什么叫做得好」的要求，是互相打架的。</p>
 
   <div class="tri">
     <div class="tri-card reveal d1">
-      <div class="tri-num">Ⅰ</div>
-      <h3>抽取</h3>
-      <div class="tri-rule">要忠于原文</div>
-      <p>「不含白砂糖」一个字都不能改——改了就不再是素材里真实说过的话，证据链就断了。</p>
+      <div class="tri-num">CRITERION Ⅰ · 抽取</div>
+      <h3>要忠于原文</h3>
+      <div class="tri-rule">一个字都不能改</div>
+      <p>「不含白砂糖」必须原样保留——改了就不再是素材里真实说过的话，<b>证据链就此断裂</b>。</p>
     </div>
     <div class="tri-card reveal d2">
-      <div class="tri-num">Ⅱ</div>
-      <h3>归一</h3>
-      <div class="tri-rule">要敢改写</div>
-      <p>必须把它改写成「无蔗糖」，才能和「零蔗糖」「不加一点糖」合并成同一个标准词。</p>
+      <div class="tri-num">CRITERION Ⅱ · 归一</div>
+      <h3>要敢改写</h3>
+      <div class="tri-rule">必须改写成标准词</div>
+      <p>只有改写成「无蔗糖」，才能和「零蔗糖」「不加一点糖」合并成同一个标准条目。</p>
     </div>
     <div class="tri-card reveal d3">
-      <div class="tri-num">Ⅲ</div>
-      <h3>归类</h3>
-      <div class="tri-rule">要看全局</div>
-      <p>得知道整个子行业有哪些同类，才能把「无蔗糖」和「低糖」「控糖」放到正确的位置。</p>
+      <div class="tri-num">CRITERION Ⅲ · 归类</div>
+      <h3>要看全局</h3>
+      <div class="tri-rule">必须知道整个行业</div>
+      <p>得掌握整个子行业的类目全貌，才能把「无蔗糖」和「低糖」「控糖」放到正确的位置。</p>
     </div>
   </div>
 
-  <div class="pit reveal d3">单 Agent 版真实踩过的坑：<b>129 对</b>纯语序倒装重复（「无蔗糖粗粮」≈「粗粮无蔗糖」）识别不出；<b>「拍二发三」「平台补贴」</b>这类价格词被当成卖点收进库，还专为它们建了 4 个簇——正是这些坑，逼出了后面的拆分。</div>
+  <div class="pit reveal d3">单 Agent 方案的实测失败样本：<b>129 对</b>纯语序倒装重复（「无蔗糖粗粮」≈「粗粮无蔗糖」）无法识别；<b>「拍二发三」「平台补贴」</b>等价格词被误收为卖点，甚至单独成簇 4 个——判据在同一上下文中互相污染，拆分成为必然。</div>
 
-  <p class="clash reveal d4">塞进一个上下文，必然互相污染——<em>所以拆开</em>，让每个 Agent 只守一条判据。</p>
+  <p class="clash reveal d4">三套判据塞进同一个上下文，必然互相污染——<em>于是拆开</em>，让每个 Agent 只守一条判据。</p>
+ </div>
 </section>
+<style>
+  /* ── 架构总览 ───────────────────────── */
+  .arch{margin-top:64px}
+  .orch{
+    max-width:460px;margin:0 auto;text-align:center;
+    background:linear-gradient(155deg,#1b2440 0%,var(--dark) 62%);
+    color:#fff;border-radius:var(--radius);padding:30px 34px;
+    position:relative;box-shadow:0 16px 40px rgba(10,14,28,.25);
+    border:1px solid rgba(122,162,255,.25);
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease);
+  }
+  .orch:hover{transform:translateY(-4px);box-shadow:0 22px 50px rgba(10,14,28,.35)}
+  .orch .role{font-size:12px;letter-spacing:.2em;opacity:.65;margin-bottom:8px;font-family:var(--sans)}
+  .orch h3{font-family:var(--serif);font-size:24px;margin-bottom:6px}
+  .orch p{font-size:13.5px;opacity:.8;line-height:1.7;font-family:var(--sans)}
+  .orch p b{color:#fff}
+  .orch-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+  .orch-chips span{
+    font-family:var(--mono);font-size:11px;padding:4px 11px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.78);
+  }
+  .arch-line{width:1px;height:44px;background:var(--line);margin:0 auto}
+  .arch-fan{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding-top:44px}
+  .arch-fan::before{content:"";position:absolute;top:0;left:16.6%;right:16.6%;height:1px;background:var(--line)}
+  .agent{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;
+    position:relative;box-shadow:var(--sh-sm);
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
+  }
+  .agent::before{content:"";position:absolute;top:-44px;left:50%;width:1px;height:44px;background:var(--line)}
+  .agent:hover{transform:translateY(-5px);border-color:rgba(47,92,255,.45);box-shadow:0 18px 44px rgba(47,92,255,.12)}
+  .agent .code{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.08em;margin-bottom:10px}
+  .agent h4{font-size:18px;font-weight:700;margin-bottom:8px;font-family:var(--sans)}
+  .agent p{font-size:13.5px;color:var(--ink-2);line-height:1.7;font-family:var(--sans)}
+  .agent p b{color:var(--ink);font-weight:600}
+  .workers{display:flex;gap:10px;margin-top:16px}
+  .worker{flex:1;background:var(--bg-soft);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink-2);font-family:var(--sans)}
+  .worker b{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-bottom:2px}
+  .arch-side{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+  .side-card{
+    border-radius:var(--radius);padding:26px 28px;display:flex;gap:18px;align-items:flex-start;
+    box-shadow:var(--sh-sm);
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease);
+  }
+  .side-card:hover{transform:translateY(-4px)}
+  .side-script{background:var(--bg-soft);border:1px solid var(--line-soft)}
+  .side-eval{background:linear-gradient(140deg,var(--accent-soft),rgba(124,58,237,.06));border:1px solid rgba(47,92,255,.22)}
+  .side-icon{
+    flex:0 0 40px;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+    font-family:var(--mono);font-size:13px;font-weight:700;
+  }
+  .side-script .side-icon{background:#fff;border:1px solid var(--line);color:var(--ink-2)}
+  .side-eval .side-icon{background:var(--grad);color:#fff}
+  .side-card h4{font-size:16px;font-weight:700;margin-bottom:4px;font-family:var(--sans)}
+  .side-card p{font-size:13.5px;color:var(--ink-2);font-family:var(--sans)}
+  .side-card p b{color:var(--ink);font-weight:600}
+  .arch-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:40px}
+  .arch-chips span{
+    font-family:var(--mono);font-size:11.5px;padding:6px 15px;border-radius:999px;
+    background:var(--bg-soft);border:1px solid var(--line-soft);color:var(--ink-2);
+  }
+  .arch-note{margin-top:40px;text-align:center;font-size:14px;color:var(--ink-3);font-family:var(--sans)}
+  @media(max-width:860px){
+    .arch-fan{grid-template-columns:1fr;padding-top:0;gap:44px}
+    .arch-fan::before{display:none}
+    .agent::before{top:-24px;height:24px}
+    .arch-side{grid-template-columns:1fr}
+  }
+
+  /* ── 全链路 case ───────────────────── */
+  .caseflow{
+    margin-top:72px;border:1px solid var(--line);border-radius:var(--radius);
+    background:#fff;overflow:hidden;text-align:left;box-shadow:var(--sh-sm);
+    transition:box-shadow .35s var(--ease);
+  }
+  .caseflow:hover{box-shadow:0 24px 60px rgba(22,26,35,.08)}
+  .caseflow-head{
+    padding:24px 34px;border-bottom:1px solid var(--line-soft);
+    background:linear-gradient(120deg,var(--accent-soft),rgba(124,58,237,.05));
+    display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .caseflow-head h3{font-size:19px;font-weight:700}
+  .caseflow-head span{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.14em}
+  .cf-row{display:grid;grid-template-columns:180px 1fr;gap:22px;padding:17px 34px;align-items:start;transition:background .3s}
+  .cf-row:hover{background:var(--bg-soft)}
+  .cf-row + .cf-row{border-top:1px solid var(--line-soft)}
+  .cf-stage{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);padding-top:3px;line-height:1.6}
+  .cf-stage b{display:block;color:var(--accent);font-size:12.5px;letter-spacing:.06em}
+  .cf-body{font-size:14.5px;color:var(--ink-2);line-height:1.8;font-family:var(--sans)}
+  .cf-body b{color:var(--ink);font-weight:600}
+  .cf-body .vo{color:var(--ink);font-size:15px;font-family:var(--serif)}
+  .cf-chip{
+    display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 10px;
+    border-radius:999px;background:var(--accent-soft);border:1px solid rgba(47,92,255,.2);
+    color:var(--accent-deep);margin:2px 4px 2px 0;
+  }
+  .cf-jump{
+    display:inline-flex;align-items:center;gap:8px;margin-left:14px;padding:8px 20px;
+    border-radius:999px;background:var(--ink);color:#fff;font-size:13px;
+    text-decoration:none;font-family:var(--sans);
+    transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s;
+  }
+  .cf-jump:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(22,26,35,.28);background:var(--accent)}
+  @media(max-width:860px){
+    .cf-row{grid-template-columns:1fr;gap:6px;padding:16px 22px}
+    .cf-jump{margin-left:0;margin-top:8px}
+  }
+
+  /* ── 双路径 ─────────────────────────── */
+  .paths{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:64px}
+  .path{
+    border:1px solid var(--line);border-radius:var(--radius);padding:38px 34px;background:#fff;
+    box-shadow:var(--sh-sm);
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
+  }
+  .path:hover{transform:translateY(-5px);box-shadow:0 20px 48px rgba(22,26,35,.08);border-color:rgba(47,92,255,.4)}
+  .path-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+  .path-head h3{font-family:var(--serif);font-size:24px}
+  .path-badge{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--accent)}
+  .path-desc{font-size:14px;color:var(--ink-2);margin-bottom:26px;font-family:var(--sans)}
+  .steps{display:flex;flex-direction:column;gap:0}
+  .step{display:flex;align-items:center;gap:16px;padding:13px 0}
+  .step + .step{border-top:1px solid var(--line-soft)}
+  .step-no{
+    flex:0 0 26px;width:26px;height:26px;border-radius:50%;
+    border:1px solid var(--line);display:grid;place-items:center;
+    font-size:12px;color:var(--ink-3);font-family:var(--mono);
+    transition:border-color .3s,color .3s;
+  }
+  .path:hover .step-no{border-color:rgba(47,92,255,.4);color:var(--accent)}
+  .step b{font-size:15px;font-weight:600;margin-right:8px}
+  .step span{font-size:13px;color:var(--ink-3);font-family:var(--sans)}
+  @media(max-width:860px){.paths{grid-template-columns:1fr}}
+
+  /* ── 工程机制 ───────────────────────── */
+  .mech{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:64px}
+  .mech-card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:34px 30px;
+    position:relative;overflow:hidden;
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
+  }
+  .mech-card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:var(--grad);opacity:0;transition:opacity .35s;
+  }
+  .mech-card:hover{transform:translateY(-5px);box-shadow:0 20px 48px rgba(22,26,35,.08);border-color:rgba(47,92,255,.3)}
+  .mech-card:hover::before{opacity:1}
+  .mech-no{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.14em;margin-bottom:14px}
+  .mech-card h3{font-size:19px;font-weight:700;margin-bottom:10px;font-family:var(--sans)}
+  .mech-card p{font-size:14.5px;color:var(--ink-2);font-family:var(--sans)}
+  .mech-card p b{color:var(--ink);font-weight:600}
+  .mech-tag{
+    display:inline-block;margin-top:14px;padding:5px 12px;border-radius:999px;
+    background:var(--bg-soft);border:1px solid var(--line-soft);
+    font-family:var(--mono);font-size:11.5px;color:var(--ink-2);
+  }
+  @media(max-width:860px){.mech{grid-template-columns:1fr}}
+
+  /* ── 双通道向量化专题卡 ─────────────── */
+  .dual{
+    margin-top:28px;border:1px solid var(--line);border-radius:var(--radius);
+    padding:40px 38px;background:#fff;box-shadow:var(--sh-sm);
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease);
+  }
+  .dual:hover{transform:translateY(-4px);box-shadow:0 20px 48px rgba(22,26,35,.07)}
+  .dual h3{font-size:21px;font-weight:700;margin-bottom:12px;font-family:var(--sans)}
+  .dual > p{font-size:15px;color:var(--ink-2);max-width:880px;font-family:var(--sans)}
+  .dual > p b{color:var(--ink);font-weight:600}
+  .dual-formula{
+    display:inline-block;margin-top:14px;padding:6px 14px;border-radius:999px;
+    background:var(--accent-soft);border:1px solid rgba(47,92,255,.22);
+    font-family:var(--mono);font-size:12px;color:var(--accent-deep);
+  }
+  .dual-flow{display:flex;align-items:center;gap:10px;margin-top:22px;flex-wrap:wrap}
+  .dual-flow span{
+    font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:999px;
+    background:var(--bg-soft);border:1px solid var(--line-soft);color:var(--ink-2);
+  }
+  .dual-flow i{font-style:normal;color:var(--ink-3);font-family:var(--sans)}
+  .dual-effect{margin-top:24px;font-size:15px;color:var(--ink-2);max-width:880px;font-family:var(--sans)}
+  .dual-effect b{color:var(--accent-deep);font-weight:600}
+
+  /* ── TextGrad ───────────────────────── */
+  .tg{margin-top:60px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff;box-shadow:var(--sh-sm)}
+  .tg-row{display:grid;grid-template-columns:1fr 1.35fr 1.15fr;transition:background .3s}
+  .tg-row + .tg-row{border-top:1px solid var(--line-soft)}
+  .tg-row:hover{background:var(--bg-soft)}
+  .tg-head{background:var(--bg-soft)}
+  .tg-head:hover{background:var(--bg-soft)}
+  .tg-cell{padding:22px 26px;font-size:14px;color:var(--ink-2);line-height:1.7;font-family:var(--sans)}
+  .tg-cell + .tg-cell{border-left:1px solid var(--line-soft)}
+  .tg-head .tg-cell{
+    padding:14px 26px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    color:var(--ink-3);font-weight:700;
+  }
+  .tg-pain{font-weight:700;color:var(--ink);font-size:15px}
+  .tg-pain small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-3);margin-top:4px}
+  .tg-mech b{color:var(--accent-deep);font-weight:600}
+  .tg-win b{color:var(--green);font-weight:600}
+  @media(max-width:860px){
+    .tg-row{grid-template-columns:1fr}
+    .tg-cell + .tg-cell{border-left:0;border-top:1px dashed var(--line-soft)}
+    .tg-head{display:none}
+  }
+
+  /* ── AIGC 成片 ─────────────────────── */
+  .aigc-flow{
+    margin:56px auto 0;display:flex;align-items:center;justify-content:center;gap:0;
+    max-width:900px;text-align:center;
+  }
+  .aigc-pill{
+    padding:12px 22px;border-radius:999px;border:1px solid var(--line);
+    font-size:14px;font-weight:600;background:#fff;white-space:nowrap;font-family:var(--sans);
+  }
+  .aigc-pill.sellpoint{
+    background:linear-gradient(140deg,var(--accent-soft),rgba(124,58,237,.08));
+    border-color:rgba(47,92,255,.35);color:var(--accent-deep);
+    box-shadow:0 8px 20px rgba(47,92,255,.10);
+  }
+  .aigc-arrow{flex:0 0 40px;color:#c2c8d0;font-weight:300}
+  @media(max-width:860px){
+    .aigc-flow{flex-direction:column;gap:10px}
+    .aigc-arrow{transform:rotate(90deg);flex:0 0 26px}
+  }
+
+  .scripts{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px}
+  .script-card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 28px;
+    box-shadow:var(--sh-sm);
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
+  }
+  .script-card:hover{transform:translateY(-5px);border-color:rgba(47,92,255,.4);box-shadow:0 18px 44px rgba(22,26,35,.08)}
+  .script-ver{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em;margin-bottom:12px}
+  .script-card h4{font-size:18px;font-weight:700;margin-bottom:4px;font-family:var(--sans)}
+  .script-style{font-size:12.5px;color:var(--ink-3);margin-bottom:12px;font-family:var(--sans)}
+  .script-card p{font-size:13.5px;color:var(--ink-2);line-height:1.75;font-family:var(--sans)}
+  @media(max-width:860px){.scripts{grid-template-columns:1fr}}
+
+  /* ── 分镜节选 ─────────────────────── */
+  .storyboard{margin-top:20px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff;box-shadow:var(--sh-sm)}
+  .sb-row{display:grid;grid-template-columns:110px 1fr 210px;gap:22px;padding:22px 28px;align-items:center;transition:background .3s}
+  .sb-row:hover{background:var(--bg-soft)}
+  .sb-row + .sb-row{border-top:1px solid var(--line-soft)}
+  .sb-no{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent)}
+  .sb-no span{display:block;font-weight:400;font-size:11px;color:var(--ink-3);margin-top:3px}
+  .sb-scene{font-size:14.5px;color:var(--ink);line-height:1.7}
+  .sb-vo{font-size:13.5px;color:var(--ink-3);margin-top:4px}
+  .sb-tag{
+    font-size:12px;color:var(--accent-deep);background:var(--accent-soft);
+    border:1px solid rgba(47,92,255,.2);border-radius:10px;padding:8px 12px;
+    line-height:1.6;text-align:center;font-family:var(--sans);
+  }
+  @media(max-width:860px){.sb-row{grid-template-columns:1fr;gap:10px}}
+
+  .videos{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:56px}
+  .video-card{
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff;
+    box-shadow:var(--sh-sm);
+    transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;
+  }
+  .video-card:hover{transform:translateY(-5px);box-shadow:0 22px 52px rgba(22,26,35,.12);border-color:rgba(47,92,255,.3)}
+  .video-card video{display:block;width:100%;max-height:540px;background:#0b0d12}
+  .video-meta{padding:18px 24px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-top:1px solid var(--line-soft)}
+  .video-meta h4{font-size:15.5px;font-weight:700}
+  .video-meta span{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+  @media(max-width:860px){.videos{grid-template-columns:1fr}}
+
+  .hookline{margin:52px auto 0;max-width:780px;text-align:center;font-size:15.5px;color:var(--ink-2);line-height:1.9}
+  .hookline b{color:var(--ink);font-weight:600}
+
+  /* ── 灰度测试横幅 ──────────────────── */
+  .graytest{
+    margin-top:72px;border-radius:26px;padding:60px 40px;text-align:center;
+    background:
+      radial-gradient(60% 120% at 50% 0%,rgba(47,92,255,.10),transparent 70%),
+      linear-gradient(180deg,var(--accent-soft) 0%,#fff 100%);
+    border:1px solid rgba(47,92,255,.18);
+  }
+  .gt-live{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;color:var(--accent-deep);
+    margin-bottom:20px;
+  }
+  .gt-live i{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.8s ease-out infinite}
+  @keyframes pulse{
+    0%{opacity:1;box-shadow:0 0 0 0 rgba(47,92,255,.35)}
+    70%{opacity:.7;box-shadow:0 0 0 8px rgba(47,92,255,0)}
+    100%{opacity:1;box-shadow:0 0 0 0 rgba(47,92,255,.35)}
+  }
+  .graytest p{font-size:clamp(24px,3.2vw,36px);font-weight:700;line-height:1.5}
+  .graytest p b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+
+  /* ── 成果数字（深色面板） ─────────────── */
+  .numbers{
+    position:relative;overflow:hidden;
+    background:radial-gradient(135% 150% at 16% 0%, #1b2440 0%, var(--dark) 55%);
+    border-radius:28px;padding:84px 64px;margin-top:20px;
+    box-shadow:0 30px 80px rgba(10,14,28,.30);
+  }
+  .numbers::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(80% 70% at 30% 0%,#000 20%,transparent 100%);
+    -webkit-mask-image:radial-gradient(80% 70% at 30% 0%,#000 20%,transparent 100%);
+  }
+  .numbers > *{position:relative}
+  .numbers .eyebrow{color:var(--accent-light)}
+  .numbers .eyebrow::before{background:var(--accent-light)}
+  .numbers .title{color:#fff}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:56px}
+  .stat{border-left:1px solid rgba(255,255,255,.16);padding-left:28px;transition:border-color .35s var(--ease)}
+  .stat:hover{border-left-color:var(--accent-light)}
+  .stat .big{font-family:var(--serif);font-size:clamp(40px,4.4vw,58px);font-weight:700;line-height:1.1;color:#fff}
+  .stat .big em{font-style:normal;background:linear-gradient(100deg,var(--accent-light),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat .from{font-size:13px;color:rgba(255,255,255,.45);margin-top:8px;font-family:var(--mono)}
+  .stat h4{font-size:15px;font-weight:700;margin-top:16px;color:#fff;font-family:var(--sans)}
+  .stat p{font-size:13.5px;color:rgba(255,255,255,.62);margin-top:4px;font-family:var(--sans)}
+  .numbers .foot{
+    margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);
+    font-size:12.5px;color:rgba(255,255,255,.42);line-height:1.8;font-family:var(--sans);
+  }
+  @media(max-width:860px){.numbers{padding:56px 28px}.stat-grid{grid-template-columns:1fr}}
+
+  /* ── 收尾 ───────────────────────────── */
+  .outro{
+    padding:150px 0 90px;text-align:center;position:relative;overflow:hidden;
+    background:var(--dark);color:#fff;
+  }
+  .outro::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(50% 60% at 50% 110%,rgba(47,92,255,.22),transparent 70%),
+      radial-gradient(40% 50% at 80% 0%,rgba(124,58,237,.14),transparent 70%);
+  }
+  .outro > *{position:relative}
+  .outro .big{font-family:var(--serif);font-size:clamp(34px,5vw,56px);font-weight:700;line-height:1.5;letter-spacing:.05em}
+  .outro .big em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .outro .meta{margin-top:34px;font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.06em;font-family:var(--sans);line-height:2}
+  .outro .meta a{color:var(--accent-light);text-decoration:none;border-bottom:1px solid rgba(122,162,255,.4)}
+  .outro .meta a:hover{color:#fff}
+  .outro hr{width:56px;margin:40px auto 0;border:0;height:1px;background:rgba(255,255,255,.18)}
+</style>
 
 <!-- ④ 架构总览 -->
-<section class="wrap" id="arch" style="padding-top:40px">
+<section class="wrap" id="arch">
   <div class="eyebrow reveal">03 · ARCHITECTURE</div>
   <h2 class="title reveal d1">一个调度，五个单元</h2>
-  <p class="lede reveal d2">Orchestrator 是唯一入口，但它自己一个卖点都不抽——只做意图识别、分派、校验、收口。</p>
+  <p class="lede reveal d2">Orchestrator 是整个系统的唯一入口，但它自己一个卖点都不抽——只做意图识别、分派、校验与收口。</p>
 
   <div class="arch">
     <div class="orch reveal d1">
       <div class="role">ORCHESTRATOR</div>
       <h3>调度器</h3>
-      <p>串行分派、逐步校验、收口写库——但它<b>不抽词、不聚类、不路由、不碰业务判断</b>。</p>
-      <div class="orch-chips"><span>意图识别</span><span>分派</span><span>产物校验</span><span>失败分类处置</span><span>断点续跑</span><span>扩框架判定</span><span>拉人确认</span></div>
+      <p>串行分派、逐步校验、收口写库——<b>不抽词、不聚类、不路由，不触碰任何业务判断</b>。</p>
+      <div class="orch-chips"><span>意图识别</span><span>分派</span><span>产物校验</span><span>失败分类处置</span><span>断点续跑</span><span>扩框架判定</span><span>人工确认</span></div>
     </div>
     <div class="arch-line reveal d2"></div>
     <div class="arch-fan">
       <div class="agent reveal d2">
         <div class="code">01 · EXTRACTOR</div>
         <h4>抽取 Agent</h4>
-        <p>逐条从口播里切出卖点段，每条带<b>原文证据</b>可溯源。无状态设计：切成 100 条一片，fan-out 多实例并行抽取，再 merge 装配——全系统唯一的并行点。</p>
+        <p>逐条从口播里切出卖点段，每条带<b>原文证据</b>可溯源。无状态设计：切成 100 条一片，fan-out 多实例并行抽取再 merge 装配——全系统唯一的并行点。</p>
       </div>
       <div class="agent reveal d3">
         <div class="code">02 · FRAMEWORK BUILDER</div>
         <h4>框架构建 Agent</h4>
-        <p>把卖点词组织成「二级簇 → 一级骨架」。内部再拉两个 worker 分步加工，自己判一级映射、全局二次审查后才冻结：</p>
+        <p>把卖点词组织成「二级簇 → 一级骨架」。内部再调度两个 worker 分步加工，自判一级映射、全局二次审查后才冻结：</p>
         <div class="workers">
           <div class="worker"><b>02a · 规整</b>同义合并、标准化命名</div>
           <div class="worker"><b>02b · 聚类</b>归成 25–35 个二级簇</div>
@@ -721,7 +807,7 @@
       <div class="agent reveal d4">
         <div class="code">03 · ROUTER</div>
         <h4>路由 Agent</h4>
-        <p>期次更新的日常主力。<b>检索优先、LLM 兜底</b>：cos ≥ 0.9 自动归属再复查，0.5–0.9 复核 topk，低于 0.5 全库复核。只用框架，绝不改框架——装不下的交回 02。</p>
+        <p>期次更新的日常主力。<b>检索优先、LLM 兜底</b>：cos ≥ 0.9 自动归属再复查，0.5–0.9 复核 topk，低于 0.5 全库复核。只用框架、绝不改框架——装不下的交回 02。</p>
       </div>
     </div>
     <div class="arch-side">
@@ -729,19 +815,19 @@
         <div class="side-icon">04</div>
         <div>
           <h4>库治理 · 确定性脚本</h4>
-          <p>唯一写库入口，不是 LLM。发 ID、写<b>累积 / 当期双口径</b>、留变更日志与入库前快照，幂等可重跑。</p>
+          <p>全系统唯一写库入口，且不是 LLM。发 ID、写<b>累积 / 当期双口径</b>、留变更日志与入库前快照，幂等可重跑。</p>
         </div>
       </div>
       <div class="side-card side-eval reveal d4">
         <div class="side-icon">05</div>
         <div>
           <h4>评测 Agent · 独立第三方</h4>
-          <p>与生产链路平级，不读执行侧任何自述理由，按四模块逐条独立判分——自己的作业自己不批。</p>
+          <p>与生产链路平级，不读取执行侧任何自述理由，按四模块逐条独立判分——生产与评测彻底隔离。</p>
         </div>
       </div>
     </div>
     <div class="arch-chips reveal d5"><span>6 个角色</span><span>2 种运行模式</span><span>每步契约化交接</span><span>每步硬校验</span><span>唯一并行点</span></div>
-    <p class="arch-note reveal d5">每个 Agent 上下文里只有自己那一份技能书，判据互不串味。</p>
+    <p class="arch-note reveal d5">每个 Agent 的上下文里只有自己那一份技能书——判据互不串味。</p>
   </div>
 
   <!-- 全链路 case -->
@@ -763,7 +849,7 @@
       <div class="cf-body">归一为标准卖点词 <b>「非油炸低温烘烤」</b>，同义并入：<span class="cf-chip">非油炸</span><span class="cf-chip">烤的不炸</span><span class="cf-chip">0 油炸</span></div>
     </div>
     <div class="cf-row">
-      <div class="cf-stage"><b>③ 归类</b>02b · 02</div>
+      <div class="cf-stage"><b>③ 归类</b>02b · CLUSTER</div>
       <div class="cf-body">挂进稳定骨架：二级 <b>「烘焙非油炸工艺」</b> → 一级 <b>「用料品质」</b>。</div>
     </div>
     <div class="cf-row">
@@ -772,7 +858,7 @@
     </div>
     <div class="cf-row">
       <div class="cf-stage"><b>⑤ 量化卖点词</b>METRICS · COST</div>
-      <div class="cf-body">在库累计 <b>vv 12,431</b>，近 30 天还有 <b>3,842</b> 条新素材在说，「用料品质」骨架下工艺类 Top1——数据说这个词<b>值得投</b>。<br><span class="cf-chip">单条素材全链路 ≈ ¥0.018</span><span class="cf-chip">一期 990 条跑完 &lt; ¥20</span><span class="cf-chip">全程 ≈ 40 min</span></div>
+      <div class="cf-body">在库累计 <b>vv 12,431</b>，近 30 天仍有 <b>3,842</b> 条新素材在说，「用料品质」骨架下工艺类 Top1——数据证明这个词<b>值得投</b>。<br><span class="cf-chip">单条素材全链路 ≈ ¥0.018</span><span class="cf-chip">一期 990 条跑完 &lt; ¥20</span><span class="cf-chip">全程 ≈ 40 min</span></div>
     </div>
     <div class="cf-row">
       <div class="cf-stage"><b>⑥ 链接 Hook</b>HOOK</div>
@@ -785,41 +871,41 @@
   </div>
 </section>
 
-<!-- ③.5 设计原则 -->
+<!-- ⑤ 设计原则 -->
 <section class="band" id="principles">
  <div class="wrap">
-  <div class="eyebrow reveal">04 · DESIGN PRINCIPLES · 理解</div>
-  <h2 class="title reveal d1">搭 Agent，三个判断</h2>
-  <p class="lede reveal d2">不是框架选型问题，是踩过坑之后守住的三条原则——它们贯穿了上面整张架构图。</p>
+  <div class="eyebrow reveal">04 · DESIGN PRINCIPLES</div>
+  <h2 class="title reveal d1">从失败中沉淀的三条设计原则</h2>
+  <p class="lede reveal d2">不是框架选型问题，而是踩过坑之后守住的边界——它们贯穿了上面整张架构图。</p>
 
   <div class="tri">
     <div class="tri-card reveal d1">
-      <div class="tri-num">Ⅰ</div>
-      <h3>判断交 LLM，确定性交脚本</h3>
+      <div class="tri-num">PRINCIPLE Ⅰ</div>
+      <h3>判断归 LLM，确定性归脚本</h3>
       <div class="tri-rule">能算出来的，绝不让模型猜</div>
-      <p>切片、合并、相似度召回、发 ID、写库、校验，全是脚本。模型只做它真正擅长的那部分：<b>语义判断</b>。</p>
+      <p>切片、合并、相似度召回、发 ID、写库、校验，全部是确定性脚本。模型只做它真正擅长的事：<b>语义判断</b>。</p>
     </div>
     <div class="tri-card reveal d2">
-      <div class="tri-num">Ⅱ</div>
+      <div class="tri-num">PRINCIPLE Ⅱ</div>
       <h3>默认串行，逐步校验</h3>
-      <div class="tri-rule">出错立刻停在原地</div>
-      <p>每步产物落盘、契约化交接，上一步的输出就是下一步的输入，校验不过不往下走——<b>不闷头跑到最后</b>。</p>
+      <div class="tri-rule">任何一步不过，流水线停在原地</div>
+      <p>每步产物落盘、契约化交接，上一步的输出就是下一步的输入，校验不过绝不向下传递——<b>错误不扩散</b>。</p>
     </div>
     <div class="tri-card reveal d3">
-      <div class="tri-num">Ⅲ</div>
+      <div class="tri-num">PRINCIPLE Ⅲ</div>
       <h3>权力分离</h3>
-      <div class="tri-rule">谁的作业谁不批</div>
-      <p>调度器不判断业务；写库只有一个入口；评测方不读被评方给自己写的理由。</p>
+      <div class="tri-rule">生产、写入、评测三权分立</div>
+      <p>调度器不做业务判断；写库只有一个入口；评测方不读被评方的自述理由。</p>
     </div>
   </div>
  </div>
 </section>
 
-<!-- ⑤ 两条路径 -->
-<section class="wrap" id="paths" style="padding-top:40px">
+<!-- ⑥ 两条路径 -->
+<section class="wrap" id="paths" style="padding-top:100px">
   <div class="eyebrow reveal">05 · TWO PATHS</div>
   <h2 class="title reveal d1">建一次框架，之后只用它</h2>
-  <p class="lede reveal d2">第一次跑和日常期次更新走不同路径——系统自动判定，不需要人指定。</p>
+  <p class="lede reveal d2">首次构建与日常期次更新走不同路径——由系统自动判定，无需人工指定。</p>
 
   <div class="paths">
     <div class="path reveal d1">
@@ -843,35 +929,36 @@
   </div>
 </section>
 
-<!-- ⑥ 工程机制 -->
-<section class="wrap" id="mech" style="padding-top:40px">
+<!-- ⑦ 工程机制 -->
+<section class="band" id="mech">
+ <div class="wrap">
   <div class="eyebrow reveal">06 · ENGINEERING</div>
-  <h2 class="title reveal d1">让 LLM 流水线变得可信</h2>
-  <p class="lede reveal d2">模型输出天然会抖，可信不是靠运气，是靠一圈确定性的工程机制兜出来的。</p>
+  <h2 class="title reveal d1">让 LLM 流水线工程级可信</h2>
+  <p class="lede reveal d2">模型输出天然存在抖动。可信不是靠运气，而是靠一圈确定性的工程机制兜出来的。</p>
 
   <div class="mech">
     <div class="mech-card reveal d1">
       <div class="mech-no">MECH · 01</div>
       <h3>失败先分类，再决定动不动</h3>
-      <p>进程崩溃原样重试（至多 2 次）；质量不达标带反馈重跑（至多 1 次）；结构断链直接停——因为重试不会变好。重试粒度压到最小：只重跑那一片、那一个单元。</p>
+      <p>进程崩溃原样重试（至多 2 次）；质量不达标带反馈重跑（至多 1 次）；结构断链直接停止——因为重试不会变好。重试粒度压到最小：只重跑那一片、那一个单元。</p>
       <span class="mech-tag">进程类 ≤2 · 质量类 ≤1 · 结构类 stop</span>
     </div>
     <div class="mech-card reveal d2">
       <div class="mech-no">MECH · 02</div>
       <h3>每一步都有硬校验</h3>
-      <p>计数不变式守住"不丢词"，簇数区间守住"粒度不漂"，落表前 UNMAPPED 必须为零。校验不过就停下来报告，不闷头跑错。</p>
+      <p>计数不变式守住「不丢词」，簇数区间守住「粒度不漂」，落表前 UNMAPPED 必须为零。校验不过即停止并报告，错误绝不向下游传递。</p>
       <span class="mech-tag">covered + dropped ≡ total</span>
     </div>
     <div class="mech-card reveal d3">
       <div class="mech-no">MECH · 03</div>
       <h3>交接卡 + 台账，崩了接着跑</h3>
-      <p>每步产一份自洽 handoff（输入就是上游输出），另有 run_state 台账记录每步状态。会话断了、进程崩了，从断点续跑，已完成步骤不重跑。</p>
+      <p>每步产出一份自洽 handoff（输入即上游输出），另有 run_state 台账记录每步状态。会话中断、进程崩溃，均可从断点续跑，已完成步骤不重跑。</p>
       <span class="mech-tag">handoff chain · run_state resume</span>
     </div>
     <div class="mech-card reveal d4">
       <div class="mech-no">MECH · 04</div>
       <h3>人在回路，全程可对账</h3>
-      <p>凡是要动框架的新增条目，逐项经人确认才入库；检索分流的原始快照只读封存，LLM 每一次改判都能拿快照对账——谁改的、改成什么，一目了然。</p>
+      <p>凡涉及框架变更的新增条目，逐项经人工确认后方可入库；检索分流的原始快照只读封存，LLM 每一次改判均可对照快照审计——谁改的、改成什么，一目了然。</p>
       <span class="mech-tag">human-in-the-loop · audit baseline</span>
     </div>
   </div>
@@ -879,21 +966,21 @@
   <div class="dual reveal d2">
     <div class="mech-no">MECH · 05 · 稳定性的来源</div>
     <h3>双通道向量化 + 连通块：归一不靠模型临场发挥</h3>
-    <p>全量词先两两做<b>双通道相似度</b>：<b>Embedding 管语义</b>，负责召回同义候选；<b>TF-IDF 管字面</b>，专门纠偏语义的「高分陷阱」——语义相近但字面相反的词对，不会被误并。达标的词对连成边，交给<b>连通块算法</b>确定性归并；LLM 只在块内命名与裁决，不再每次重新想「哪些词是一伙的」。</p>
+    <p>全量词先两两计算<b>双通道相似度</b>：<b>Embedding 管语义</b>，负责召回同义候选；<b>TF-IDF 管字面</b>，专门纠偏语义的「高分陷阱」——语义相近但字面相反的词对，不会被误并。达标的词对连成边，交给<b>连通块算法</b>确定性归并；LLM 只负责块内命名与裁决，不再每次重新「想」哪些词是一伙的。</p>
     <span class="dual-formula">cos = 0.7 × Embedding ＋ 0.3 × TF-IDF</span>
     <div class="dual-flow">
       <span>双通道打分</span><i>→</i><span>连通块归并</span><i>→</i><span>LLM 块内命名</span>
     </div>
     <p class="dual-effect">语义通道防「该并的漏了」，字面通道防「该拆的并了」——分组由图算法<b>算</b>出来，不靠模型临场<b>想</b>：三次独立运行，字面一致率 <b>0.33~0.42 → 0.85~0.88</b>。</p>
   </div>
+ </div>
 </section>
 
-<!-- ⑦ TextGrad -->
-<section class="band" id="textgrad">
- <div class="wrap">
+<!-- ⑧ TextGrad -->
+<section class="wrap" id="textgrad">
   <div class="eyebrow reveal">07 · TEXTGRAD · SELF-IMPROVING PROMPTS</div>
-  <h2 class="title reveal d1">调 Prompt，从手艺变成工程</h2>
-  <p class="lede reveal d2">引入斯坦福提出的 <b>TextGrad</b>（文本梯度）框架——把 LLM 对结果的批评当作梯度，反传回 prompt 本身。人工调优的四个老大难：靠猜、说不清、不敢动、查不了，就此变成可归因、可判分、可门控、可追溯的自动闭环。</p>
+  <h2 class="title reveal d1">把 Prompt 调优，从手艺变成工程</h2>
+  <p class="lede reveal d2">引入斯坦福提出的 <b>TextGrad</b>（文本梯度）框架——把 LLM 对结果的批评当作梯度，反传回 Prompt 本身。人工调优的四个老大难：靠猜、说不清、不敢动、查不了，就此变成可归因、可判分、可门控、可追溯的自动闭环。</p>
 
   <div class="tg reveal d2">
     <div class="tg-row tg-head">
@@ -922,18 +1009,17 @@
       <div class="tg-cell tg-win"><b>53 个锚点 ID</b>，diff 精确到规则行；反复加删的锚点自动冻结交人工</div>
     </div>
   </div>
- </div>
 </section>
 
-<!-- ⑧ 成果数字：资产层的答卷 -->
+<!-- ⑨ 成果数字 -->
 <section class="wrap" id="numbers" style="padding-top:40px">
   <div class="numbers reveal">
     <div class="eyebrow">08 · RESULTS</div>
-    <h2 class="title">拆开之后，数字说话了</h2>
+    <h2 class="title" style="margin-bottom:0">拆开之后，数字说话了</h2>
 
     <div class="stat-grid">
       <div class="stat">
-        <div class="big"><em>90.4</em></div>
+        <div class="big"><em><span data-count="90.4" data-decimals="1">0</span></em></div>
         <div class="from">82.1 → 90.4 · 等级 B → A</div>
         <h4>质量总分 +8.3</h4>
         <p>同一套独立评测口径下，多 Agent 当前版相对单 Agent 版的提升。</p>
@@ -956,11 +1042,11 @@
   </div>
 </section>
 
-<!-- ⑨ AIGC 成片 -->
+<!-- ⑩ AIGC 成片 -->
 <section class="wrap" id="aigc" style="padding-top:40px">
-  <div class="eyebrow reveal">09 · AIGC OUTPUT · 结果</div>
-  <h2 class="title reveal d1">卖点最终长成了视频</h2>
-  <p class="lede reveal d2">资产库输出<b>卖点与合规红线</b>，创意层把同一个卖点包成不同的叙事外壳，再由 AIGC 批量出片。下面全部是<b>真实产物</b>。</p>
+  <div class="eyebrow reveal">09 · AIGC OUTPUT</div>
+  <h2 class="title reveal d1">资产最终长成了内容</h2>
+  <p class="lede reveal d2">资产库输出<b>卖点与合规红线</b>，创意层把同一个卖点包成不同的叙事外壳，再由 AIGC 批量出片。以下全部为<b>真实产物</b>。</p>
 
   <div class="aigc-flow reveal d2">
     <span class="aigc-pill sellpoint">资产库卖点：「配料只有红薯 · 无添加」</span>
@@ -1055,26 +1141,62 @@
   </div>
 </section>
 
-<!-- ⑩ 收尾 -->
-<footer class="outro wrap">
-  <p class="big reveal">口播进<br><em>成片出</em></p>
-  <p class="meta reveal d2">卖点资产 × AIGC · 多 Agent 工程实践</p>
-  <hr class="reveal d3">
+<!-- ⑪ 收尾 -->
+<footer class="outro">
+  <div class="big reveal">口播进，<em>成片出</em>。</div>
+  <div class="meta reveal d2">
+    Selling-Point Assets × AIGC · A Multi-Agent Practice<br>
+    <a href="https://github.com/BarryHou2003/Salling-points-for-AIGC_Agent" target="_blank" rel="noopener">github.com/BarryHou2003/Salling-points-for-AIGC_Agent</a>
+  </div>
+  <hr>
 </footer>
 
 <script>
 (function(){
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
-    });
-  },{threshold:.12,rootMargin:'0px 0px -8% 0px'});
-  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
-
-  var nav=document.getElementById('nav');
-  var onScroll=function(){nav.classList.toggle('scrolled',window.scrollY>24);};
-  window.addEventListener('scroll',onScroll,{passive:true});
+  /* 导航与进度条 */
+  var nav = document.getElementById('nav');
+  var progress = document.getElementById('progress');
+  function onScroll(){
+    var y = window.scrollY || document.documentElement.scrollTop;
+    nav.classList.toggle('scrolled', y > 40);
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h > 0 ? (y / h) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
   onScroll();
+
+  /* 滚动渐显 */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:.12, rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+
+  /* 数字滚动 */
+  var cio = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      cio.unobserve(e.target);
+      var el = e.target;
+      var target = parseFloat(el.getAttribute('data-count'));
+      var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      var dur = 1400, t0 = null;
+      function tick(t){
+        if(!t0) t0 = t;
+        var p = Math.min((t - t0) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = (target * eased).toFixed(decimals);
+        if(p < 1) requestAnimationFrame(tick);
+        else el.textContent = target.toFixed(decimals);
+      }
+      requestAnimationFrame(tick);
+    });
+  }, {threshold:.5});
+  document.querySelectorAll('[data-count]').forEach(function(el){ cio.observe(el); });
 })();
 </script>
 </body>
